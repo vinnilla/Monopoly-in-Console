@@ -1,0 +1,603 @@
+System Name: monopoly
+
+System Description:
+The system is designed to simulate a monopoly game. This system is only designed to receive input from the users asking how many players are playing (up to 4) and what piece each player would like to use. Then each player can roll the 2 die and observe their pieces moving throughout the board. Each player starts with $400,000 and can spend this money any way they'd like to. The game ends when only one player is left. Players can resign at any time. 
+Car Spaces:
+	When a player lands on a car that is not owned by another player, he/she can purchase that car for the price stated on the space. If the player chooses not to purchase the car, or lacks the funds required, no action will be taken. 
+		When a player lands on a car that is owned by another player, he/she must pay the rent for the car. If the rent cannot be paid, the player loses and all property is transferred to the player that owns the space. 
+	When a player owns all of the cars of the same brand, the player gains a monopoly over the brand. As a result, all of the rents double and the player unlocks the ability to upgrade the cars. The player can upgrade any time it is their turn.
+		Upgrading Mazdas or Hondas costs $15,000
+		Upgrading Toyotas or Mercedes costs $30,000
+		Upgrading Audis and BMWs costs $45,000
+		Upgrading Porsches and Maseratis costs $60,000
+		All cars can be upgraded 5 times.
+	When a player owns more than one bus stop, the rent increases as the number of owned bus stops increases (maxing out at 8x $5000 = $40,000.) Bus stops cannot be upgraded
+	Taxis can be bought but cannot be upgraded. The amount of rent is dependent on the rolled number that the player used to reach the taxi. If only one taxi is owned, the rolled number is multiplied by 800. If both taxis are owned, the rolled number is multiplied by 2000.
+
+When a player runs out of money (can be due to taxes, unfavorable cards, high rents) the player must stand aside and give all property to either the bank (taxes or cards) or to the player who ones the car that bankrupted them.
+
+
+
+Class: Player
+
+Global Data
+	character
+		type: char
+		This stores the symbol that represents the player's piece
+	
+	playerNum
+		type: int
+		This keeps track of what the player's number is
+	
+	currentSpace
+		type: int
+		This keeps track of the player's current space.
+	
+	previousSpace
+		type: int
+		This keeps track of the player's previous space. (this will be useful for moving the pieces)
+	
+	money
+		type: int
+		This keeps track of the player's money.
+	
+	ownedProperty
+		type: int array
+		This keeps track of which spaces the player owns in an array. Essentially, 0 means that the player does not own the space and 1 means that the player does.
+	
+	jail
+		type: int
+		This keeps track of whether the player is in jail or not. 0 means that the player is free and 1 means that the player is in jail (or needs to be sent to jail)
+	
+	jailCounter
+		type: int
+		This keeps track of how many turns the player has until the player is freed. (Player has 2 chances to roll a double to be released earlier)
+
+	dead
+		type: bool
+		This keeps track of whether the player is 'dead' or not. True if dead.
+
+
+
+Function Descriptions 
+
+	Function Name: populate
+		formal parameters and type: char symbol, int number, int space, int space2, int wealth, int properties, int crime, int crimeCounter
+		function return type: void
+		function description: This function is essentially a constructor. It receives input from monopoly.cpp and fills in all the variables within the player class.
+	
+	Function Name: returnSpace
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable currentSpace and returns it as an int so that it can be used outside the class
+	
+	Function Name: returnSpace2
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable previousSpace and returns it as an int so that it can be used outside the class
+	
+	Function Name: returnChar
+		formal parameters and type: none
+		function return type: char
+		function description: This function accesses the private player variable character and returns it as a char so that it can be used outside the class
+	
+	Function Name: returnNum
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable playerNum and returns it as an int so that it can be used outside the class
+	
+	Function Name: retrieveWealth
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable money and returns it as an int so that it can be used outside the class
+	
+	Function Name: retrieveJail
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable jail and returns it as an int so that it can be used outside the class
+	
+	Function Name: retrieveCounter
+		formal parameters and type: none
+		function return type: int
+		function description: This function accesses the private player variable jailCounter and returns it as an int so that it can be used outside the class
+	
+	Function Name: retrieveProperty
+		formal parameters and type: int counter
+		function return type: int
+		function description: This function accesses a single int in the private player variable array ownedProperty and returns it as an int so that it can be used outside the class. The returned value represents the location of the owned space within the array 
+		of spaces.
+
+	Function Name: updateDead
+		formal parameters and type: none 
+		function return type: none
+		function description: When a player 'dies', this function is called. It replaces the character with a space to remove the player from the board. It also updates the dead variable.
+
+	Function Name: updateInfo
+		formal parameters and type: int moves
+		function return type: bool
+		function description: This function updates the player variables currentSpace and previousSpace. It makes previousSpace equal to the currentSpace and updates currentSpace after the number of moves are applied. The bool that is returned helps to test whether the player has passed go (useful for gifting player money for passing go.) True is returned if the player has passed go and false is returned if the player hasn't.
+
+	Function Name: updateMovement
+		formal parameters and type:int position
+		function return type: bool
+		function description: This function updates the player's location with the location passed it. It will return true if the player passes go in the process.
+
+	Function Name: deductMoney
+		formal parameters and type: int change
+		function return type: void
+		function description: This function updates the player variable money. It substracts change from money.
+
+	Function Name: addMoney
+		formal parameters and type: int change
+		function return type: void
+		function description: This function updates the palyer variable money. It adds change to money.
+
+	Function Name: print
+		formal parameters and type: none
+		function return type: void
+		function description: This function is used to output all of the useful variables for the player class. I used it to check if changes were being made and if the changes were correct.
+
+	Function Name: updateProperty
+		formal parameters and type: int space
+		function return type: void
+		function description: This function updates the array that keeps track of which properties the player current owns. If the player has acquired a new property, it will change its corresponding value in the array to 1. If the player must sell the property to keep from going bankrupt, it will change its corresponding value in the array to 0.
+
+	Function Name: updateJail
+		formal parameters and type: int status
+		function return type: void
+		function description: This function updates the jail variable to reflect whether the player is in jail or not. 1 means the player is in jail, 0 means the player is not.
+
+	Function Name: updateJailcounter
+		formal parameters and type: none
+		function return type: void
+		function description: This function keeps track of how many rounds the player has been in jail for.
+
+	Function Name: realPrint
+		formal parameters and type: none
+		function return type: void
+		function description: This functipn prints out the statistics of the current player which can be useful for making decisions on whether or not to purchase property.
+
+
+
+Class: Space
+
+Global Data
+	color
+		type: bool
+		This variable keeps track of whether the space is a colored space (all the car spaces.) True means its a car space, false means its a noncar space (including bus stop and taxi -- which substitutes the utilities.)
+
+	nameBrand
+		type: string
+		This variable keeps track of the first part of the name. If it is a car space, it keeps track of the brand of car.
+
+	nameModel
+		type: string
+		This variable keeps track of the second part of the name. If it is a car space, it keeps track of the model of the car.
+
+	nextSpace
+		type: int
+		This variable keeps track of the location of the next space. This is not actually used in the movement...
+
+	pieces
+		type: string
+		This string keeps track of which players are on the space. Basically, the string is treated as an array of 4 characters with each index correlating to each player. When a player lands on the space, that index of the string is updated to show the player's character.
+	
+	purchased
+		type: char
+		This char keeps track of the status of the space. Currently, the actions are implemented without the action class and child action classes, this served as the basis for a huge if, ifelse segment. However, for PA5, I plan on replacing this functionality with action classes.
+	
+	buyPrice
+		type: int
+		This int represents the cost to buy the space.
+	
+	rentPrice
+		type: int
+		This int represents the cost that people must pay when they land on the space that someone else owns.
+	
+	sellPrice
+		type: int
+		This int represents the resale value of the space.
+
+	upgrade
+		type: int
+		This keeps track of what upgrade state the space is in.
+	
+	actions
+		type: string array
+		This array of strings serves to store the description of what actions are to occur. Again, this is going to be changed as the program is developed further.
+
+Function Descriptions
+
+	Function Name: populate
+		formal parameters and type:bool Color, string Brand, string Model, int Next, string Pieces, 
+	char Purchased, int Buy, int Rent, int Sell, string line1, string line2, string line3 
+		function return type: void
+		function description: Essentially a constructor for the space class
+
+	Function Name: returnColor
+		formal parameters and type: none 
+		function return type: bool
+		function description: Returns private color
+
+	Function Name: returnBrand
+		formal parameters and type: none
+		function return type: string
+		function description: Returns private nameBrand
+
+	Function Name: returnModel
+		formal parameters and type: none
+		function return type: string
+		function description: Returns private nameModel
+
+	Function Name: returnBuy
+		formal parameters and type: none 
+		function return type: int
+		function description: Returns private buyPrice
+
+	Function Name: returnPurchased
+		formal parameters and type: none
+		function return type: int
+		function description: Returns private purcased
+
+	Function Name: returnRent
+		formal parameters and type: none
+		function return type: int
+		function description: Returns private rentPrice
+
+	Function Name: returnPieces
+		formal parameters and type: none
+		function return type: string
+		function description: returns private pieces
+
+	Function Name: updateUpgrade
+		formal parameters and type: none
+		function return type: void
+		function description: Checks what upgrade state the space is in and multiplies the rent by a certain factor.
+
+	Function Name: updatesPieces
+		formal parameters and type: int Num, char Char
+		function return type: void
+		function description: Takes the player number (which correlates with the index of the string) and changes the character in the index of the string
+
+	Function Name: updateMonopoly
+		formal parameters and type: int number
+		function return type: void
+		function description: Updates the rent prices when a player has a monopoly on the brand of car. (x2 original rent)
+
+	Function Name: updateMortgage
+		formal parameters and type: none
+		function return type: void
+		function description: Not used. Couldn't get mortgaging to work =(
+
+	Function Name: modify
+		formal parameters and type: int change
+		function return type: void
+		function description: Changes ownership of the space
+
+	Function Name: reset
+		formal parameters and type: none
+		function return type: void
+		function description: Resets space to original state. Simulates when player dies or resigns and returns all property to the bank.
+
+	Function Name: realPrint
+		formal parameters and type: Space* space, int player
+		function return type: void
+		function description: Outputs all of the cars that the player owns.
+
+Class: Game_Board
+
+Global Data
+	allSpaces
+		type: Space array
+		This array stores all the separate spaces into a single array so that accessing the information is easy.
+
+Function Descriptions
+
+	Function Name: Game_Board
+		formal parameters and type: none
+		function return type: none
+		function description: constructor without parameters
+
+	Function Name: Game_Board
+		formal parameters and type: int numberofspaces
+		function return type: none
+		function description: constructor with parameter to dynamically allocate arrays. all of the spaces are manually constructed here.
+
+	Function Name: ~Game_Board
+		formal parameters and type: none
+		function return type: none
+		function description: deconstructor that deletes array of spaces to free memory
+
+	Function Name: counterIncrement
+		formal parameters and type: int start, int end, int value
+		function return type: int
+		function description: Basically adds the amount of moves rolled to the current space and returns the new space location. Takes into account top row (which works normally) and bottom row (which works the opposite way).
+
+	Function Name: removeSpaces
+		formal parameters and type: string input
+		function return type: string
+		function description: Takes a string and removes all extraneous spaces (before and after the important stuff) and then returns it
+
+	Function Name:updateUpdate
+		formal parameters and type: Player* player, Bank* bank
+		function return type: void
+		function description: Shows player all upgradable cars and lets the player choose one. Then upgrades car for a cost.
+
+	Function Name: mortgage
+		formal parameters and type: Player* player, Bank* bank
+		function return type: void
+		function description: Does not work. Mortgage is buggy.
+
+	Function Name: updatePieces
+		formal parameters and type: int playerNum, int currentSpace, int previousSpace, char character
+		function return type: void
+		function description: checks to see which space the player is on and calls the updatePieces function for the space class to update the space class variable pieces.
+
+	Function Name: updateSpaces
+		formal parameters and type: Player players[], int numPlayers
+		function return type: void
+		function description: retrieve the current and previous locations for a player and send it into the updatePieces function (the gameboard one, not the space one.)
+
+	Function Name: updateMonopoly
+		formal parameters and type: none
+		function return type: void
+		function description: Checks all spaces to see if a monopoly for the spaces has occurred. If monopoly has occurred, updates data accordingly (x2 rent price)
+
+	Function Name: updateMortgage
+		formal parameters and type:
+		function return type:
+		function description: Doesn't work. sorry
+
+	Function Name: unMortgage
+		formal parameters and type: Player* player, Bank* bank
+		function return type: void
+		function description: outputs all possible cars that can be unmortgaged. Currently works but mortgaging doesn't work so it'll always say that no property can be mortgaged.
+
+	Function Name: updatedBuses
+		formal parameters and type: none
+		function return type: void
+		function description: Checks all bus spaces to see if any groups are owned by players and rents are updated accordingly.
+
+	Function Name: modifySpace
+		formal parameters and type: int space, int change
+		function return type: void
+		function description: Calls the modify function for space class and changes ownership
+
+	Function Name: resetSpace
+		formal parameters and type: int space
+		function return type: void
+		function description: calls the reset function for space class and resets space to original state.
+
+	Function Name: outputRow
+		formal parameters and type: int start, int end
+		function return type: void
+		function description: outputs a row of spaces, given the left most space (start) and the right most space (end)
+
+	Function Name: outputColumn
+		formal parameters and type: int left, int right, bool bottom
+		function return type: void
+		function description: outputs an instance of a column, given the left space, the right space and whether it is the last row in the column or not (which will prevent the bottom line from being printed)
+
+	Function Name: print_Board
+		formal parameters and type: none
+		function return type: void
+		function description: calls outputRow and outputColumn with proper variables and outputs the whole board.
+
+
+
+Class: Bank
+
+Global Data
+	funds
+		type: int
+		Keeps track of how much money the bank has (essentially infinite)
+
+Function Descriptions
+
+	Function Name: initialize
+		formal parameters and type: int wealth
+		function return type: void
+		function description: basically a constructor
+
+	Function Name: deductFunds
+		formal parameters and type: int change
+		function return type: void
+		function description: substract change from funds
+
+	Function Name: addFunds
+		formal parameters and type: int change
+		function return type: void
+		function description: add change to funds
+
+	Function Name: print
+		formal parameters and type: none
+		function return type: void
+		function description: print funds of bank to check if changes are being made
+
+Class: Card
+
+Global Data
+	action
+		type: Action
+		Action class basically stores the action lines for each card and holds the type of card (community or chance)
+
+	position
+		type: int
+		stores its position in the deck
+
+	type
+		type: int
+		Identifies what type of card it is (by what action should occur)
+
+	value
+		type: int
+		keeps track of what value the card has (related to what action is to be done when it is drawn)
+
+
+Function Descriptions
+
+	Function Name: populate
+		formal parameters and type: int Type, int pos, string Action1, string Action2
+		function return type: void
+		function description: constructor
+
+	Function Name: print
+		formal parameters and type: none
+		function return type: void
+		function description: outputs the action of the card. will change when action class is implemented!
+
+	Function Name: changeAction
+		formal parameters and type: Action change
+		function return type: void
+		function description: changes action class action
+
+	Function Name: changePos
+		formal parameters and type: int change
+		function return type: void
+		function description: changes the position of the card (rearranging and shuffling)
+
+	Function Name: changeType
+		formal parameters and type: int change
+		function return type: void
+		function description: changes the type of card (for shuffling and rearranging)
+
+	Function Name: changeValue
+		formal parameters and type: int change
+		function return type: void
+		function description: changes value (for shuffling and rearranging)
+
+Class: Community and Chance (both have essentially the same functions)
+
+Global Data:
+	deck
+		type: Card array
+		creates an array of cards to fill up the community deck
+
+	numberofcards
+		type: int
+		keeps track of how many cards are in the deck
+
+	counter
+		type: int
+		used for executeaction when action was a pure class but no longer used
+
+Function Descriptions:
+
+	Function Name: Community
+		formal parameters and type: none
+		function return type: none
+		function description: constructor -- made all the cards manually
+
+	Function Name: ~Community
+		formal parameters and type: none
+		function return type: none
+		function description: deconstructor -- deletes dynamically allocated array of cards
+
+	Function Name: updateNum
+		formal parameters and type: int change
+		function return type: void
+		function description: changes the number of cards
+
+	Function Name: shuffle
+		formal parameters and type: none
+		function return type: void
+		function description: shuffles the deck of cards
+
+	Function Name: reArrange()
+		formal parameters and type: none
+		function return type: void
+		function description: reArranges the deck (puts the first card that was drawn into the back of the deck)
+
+	Function Name: print
+		formal parameters and type: none
+		function return type: void
+		function description: prints the name of the card and the action lines associated with it
+
+	Function Name: printDeck
+		formal parameters and type: none
+		function return type: void
+		function description: prints all the cards in the deck with relevant information -- used for checking and debugging
+
+
+
+MONOPOLY.cpp
+
+Global Data
+	players
+		type: Players array
+		stores the players into a single array so that information can be accessed easily
+
+	bank
+		type: Bank
+		initializes bank
+
+	Pieces
+		type: string
+		holds all the choosable pieces
+
+	decision
+		type: char
+		used for the many decisions that occur throughout the program
+
+	board
+		type: Game_Board
+		holds the class so that it can be referred to
+
+	PlayersAlive
+		type: int
+		keeps track of how many players are alive
+
+Function Descriptions
+
+	Function Name: nomoneyMenu
+		formal parameters and type: none
+		function return type: int
+		function description: Outputs a menu for choices when a player runs out of money. Because mortgage doesn't work, this is not used in the current version of the game.
+
+	Function Name: nomoneyAction
+		formal parameters and type: int i, int iOwner
+		function return type: void
+		function description: Originally served a greater function but now only deals with players that are 'killed' by another player. Everything the player owns is transferred to the other player.
+
+	Function Name: decisionMenu
+		formal parameters and type: int currentPlayer
+		function return type: int
+		function description: Outputs a menu of choices a player can make at the beginning of their turn and returns the decision
+
+	Function Name: decisionMenu2
+		formal parameters and type: int currentPlayer
+		function return type: int
+		function description: Outputs a menu of choices a player can make at the end of their turn and returns the decision
+
+	Function Name: rollDie
+		formal parameters and type: none
+		function return type: int
+		function description: Simulates rolling two die and returns the sum of the two numbers (as moves)
+
+	Function Name: rollJail
+		formal parameters and type: none
+		function return type: bool
+		function description: Simulates rolling two die and checks to see if the two die had matching numbers
+
+	Function Name: main
+		formal parameters and type: none
+		function return type: int
+		function description: executes the program.
+			Asks how many players and playing and dynamically allocates the player array accordingly
+			Then asks each player to choose their piece and updates player array
+			Initialize gameboard
+			Output image of board when game starts
+			Then loop in game loop until winner is declared.
+
+Compiling and Testing:
+
+Type make into the terminal to create an executible file named monopoly with a warning telling you that passGo is not being used (this is used for actions)
+This program runs the most optimally on a 1920x1080 resolution.
+	At this resolution, the board is still too 'tall' you should use ctrl + - to decrease the resolution of the terminal until the board will fit.
+
+Run the program with ./monopoly
+When the program runs, it will ask the user for the number of players.
+Then each player will choose a piece from the string of possible pieces.
+After all the players have a piece, the board will print for the first time.
+Then the program will loop, giving each player a chance to roll the die.
+The game will run until only one player is left.
